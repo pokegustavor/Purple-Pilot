@@ -3,11 +3,14 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
 using PulsarModLoader;
+using System.Reflection.Emit;
+using System.Collections.Generic;
+using System.Linq;
 namespace Purple_Pilot
 {
     public class Mod : PulsarMod
     {
-        public override string Version => "1.0";
+        public override string Version => "1.1";
 
         public override string Author => "pokegustavo";
 
@@ -48,7 +51,26 @@ namespace Purple_Pilot
                 {
                     text.color = new Color(0.41f, 0f, 0.58f, 0.93f);
                 }
+                
             }
+        }
+    }
+    [HarmonyPatch(typeof(PLInGameUI),"Update")]
+    class HealthBarFix 
+    {
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> Instructions)
+        {
+            List<CodeInstruction> instructionsList = Instructions.ToList();
+            instructionsList[477].operand = AccessTools.Method(typeof(Color),"get_white");
+            return instructionsList.AsEnumerable();
+        }
+    }
+    [HarmonyPatch(typeof(PLTeleportationScreen),"SetupUI")]
+    class TestIcon 
+    {
+        static void Postfix(ref UITexture[] ___ClassTargets) 
+        {
+            ___ClassTargets[1].color = new Color(0.41f, 0f, 0.58f, 0.93f);
         }
     }
 }
