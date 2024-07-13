@@ -6,11 +6,12 @@ using PulsarModLoader;
 using System.Reflection.Emit;
 using System.Collections.Generic;
 using System.Linq;
+using PulsarModLoader.Patches;
 namespace Purple_Pilot
 {
     public class Mod : PulsarMod
     {
-        public override string Version => "1.1";
+        public override string Version => "1.3";
 
         public override string Author => "pokegustavo";
 
@@ -58,15 +59,35 @@ namespace Purple_Pilot
     [HarmonyPatch(typeof(PLInGameUI),"Update")]
     class HealthBarFix 
     {
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> targetSequence = new List<CodeInstruction>
+            {
+                new CodeInstruction(OpCodes.Ldelem_Ref),
+                new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Color),"get_black")),
+                new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Graphic),"set_color"))
+            };
+            List<CodeInstruction> patchSequence = new List<CodeInstruction>
+            {
+                new CodeInstruction(OpCodes.Ldelem_Ref),
+                new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Color),"get_white")),
+                new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Graphic),"set_color"))
+            };
+
+            return HarmonyHelpers.PatchBySequence(instructions, targetSequence, patchSequence, HarmonyHelpers.PatchMode.REPLACE, HarmonyHelpers.CheckMode.NONNULL, false);
+        }
+
+        /*
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> Instructions)
         {
             List<CodeInstruction> instructionsList = Instructions.ToList();
             instructionsList[477].operand = AccessTools.Method(typeof(Color),"get_white");
             return instructionsList.AsEnumerable();
         }
+        */
     }
     [HarmonyPatch(typeof(PLTeleportationScreen),"SetupUI")]
-    class TestIcon 
+    class TeleporterIconFix 
     {
         static void Postfix(ref UITexture[] ___ClassTargets) 
         {
