@@ -6,6 +6,7 @@ using PulsarModLoader;
 using System.Reflection.Emit;
 using System.Collections.Generic;
 using System.Linq;
+using PulsarModLoader.CustomGUI;
 using PulsarModLoader.Patches;
 namespace Purple_Pilot
 {
@@ -90,7 +91,7 @@ namespace Purple_Pilot
             instructionsList[477].operand = AccessTools.Method(typeof(Color),"get_white");
             return instructionsList.AsEnumerable();
         }
-
+        */
         static void Postfix(PLInGameUI __instance) 
         {
             if (__instance.CrewStatusRoot.activeSelf) 
